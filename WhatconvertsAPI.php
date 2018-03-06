@@ -64,7 +64,7 @@ class WhatconvertsAPI {
 			$response = json_decode(curl_exec($this->_curl));
 			
 			if(property_exists($response, 'error_message')) {
-				break;
+				throw new Exception($response->error_message);
 			}
 
 			$leads = array_merge($leads, $response->leads);
