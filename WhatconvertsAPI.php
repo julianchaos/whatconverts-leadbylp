@@ -27,7 +27,7 @@ class WhatconvertsAPI {
 	
 	public function getLeadByLandingPage($startdate) {
 		$params = [
-			'leads_per_page' => 50,
+			'leads_per_page' => 250,
 			'page_number' => 1,
 			'start_date' => $startdate
 		];
@@ -40,18 +40,25 @@ class WhatconvertsAPI {
 			$lead_type = $lead_item->lead_type;
 			
 			if(!array_key_exists($landing_url, $leads_by_lp)) {
-				$leads_by_lp[$landing_url] = [];
+				$leads_by_lp[$landing_url] = [
+					/**
+					 * From Whatconverts API documentationt
+					 * URL: https://www.whatconverts.com/api/leads
+					 * The type of lead; chat, email, event, other, phone_call, text_message, transaction or web_form
+					 */
+					'Transaction' => 0, 'Chat' => 0, 'Event' => 0, 'Web Form' => 0, 'Phone Call' => 0
+				];
 			}
 			
 			if(!array_key_exists($lead_type, $leads_by_lp[$landing_url])) {
-				$leads_by_lp[$landing_url][$lead_type] = 0;
+				continue;
 			}
 			
 			$leads_by_lp[$landing_url][$lead_type]++;
 		}
-		
 
-		return $leads_by_lp;
+
+		return json_encode($leads_by_lp);
 	}
 	private function getLeads($params) {
 		$leads = [];
@@ -71,7 +78,7 @@ class WhatconvertsAPI {
 
 			$params['page_number']++;
 			
-		} while( $response->page_number <= $response->total_pages );
+		} while( $response->page_number < $response->total_pages );
 		
 		return $leads;
 	}
