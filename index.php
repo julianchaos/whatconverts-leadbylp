@@ -4,7 +4,7 @@ try {
 	$wcapi = new WhatconvertsAPI();
 	$leads = $wcapi->getLeadByLandingPage(date('Y-m-d', strtotime('-60 days')));
 } catch (Exception $ex) {
-	$leads = $ex->getMessage();
+	$leads = $ex->getMessage();	
 }
 ?>
 
@@ -31,25 +31,22 @@ try {
 			google.charts.setOnLoadCallback(drawChart);
 			
 			function drawChart() {
+				var googledata = loadData();
+				
 				// Create the data table.
 				var data = new google.visualization.DataTable();
 				data.addColumn('string', 'Landing Page');
-				data.addColumn('number', 'Calls');
+				data.addColumn('number', 'Transactions');
 				data.addColumn('number', 'Chats');
 				data.addColumn('number', 'Events');
 				data.addColumn('number', 'Forms');
-				data.addColumn('number', 'Transactions');
+				data.addColumn('number', 'Calls');
 		
-				data.addRows([
-				  ['LP 1', 3, 2, 4, 1, 7],
-				  ['LP 2', 1, 0, 3, 3, 2],
-				  ['LP 3', 1, 1, 1, 1, 2],
-				  ['LP 4', 1, 4, 0, 0, 1],
-				  ['LP 5', 2, 5, 1, 0, 12]
-				]);
+				data.addRows(googledata);
 
 				// Set chart options
 				var options = {
+						height: 400,
 						title:'Leads by Landing Page',
 						isStacked: true,
 					};
@@ -74,6 +71,25 @@ try {
 				var table = new google.visualization.Table(document.getElementById('google_table'));
 				table.draw(view, {width: '100%'});
 			}
+			function loadData() {
+				var data = <?php echo $leads ?>;
+				
+				var output = [];
+				for ( url in data ) {
+					if(data.hasOwnProperty(url)) {
+						// ['Landing Page URL', 'Transaction', 'Chat', 'Event', 'Web Form', 'Phone Call'];
+						output.push([url, 
+								data[url]['Transaction'],
+								data[url]['Chat'],
+								data[url]['Event'],
+								data[url]['Web Form'],
+								data[url]['Phone Call'],
+							]);
+					}
+				}
+				
+				return output;
+			}
 		</script>
 	</head>
 	<body>
@@ -83,7 +99,7 @@ try {
 					<div id="google_chart"></div>
 					<div id="google_table"></div>
 					
-					<pre><?php var_dump($leads) ?></pre>
+					<pre><?php echo $leads ?></pre>
 				</div>
 			</div>
 		</div>
